@@ -996,24 +996,3 @@ export class LiuYao {
         return `${isYang ? '阳' : '阴'}爻在第${position}位，${isYang ? '刚健' : '柔顺'}之象。`;
     }
 }
-
-// 使用示例
-function demo() {
-    const liuYao = LiuYao.getInstance();
-
-    console.log("====== 铜钱起卦 ======");
-    const gua1 = liuYao.qiGuaByCoins();
-    console.log(liuYao.duanGua(gua1));
-
-    console.log("\n====== 时间起卦 ======");
-    const gua2 = liuYao.qiGuaByTime();
-
-    // 装卦
-    const gua2WithNaJia = liuYao.naJia(gua2);
-    const gua2WithLiuQin = liuYao.anLiuQin(gua2WithNaJia);
-    const fullGua2 = liuYao.anLiuShen(gua2WithLiuQin);
-
-    console.log(liuYao.duanGua(fullGua2));
-}
-
-demo();

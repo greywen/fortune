@@ -14,9 +14,9 @@ interface LiuYaoDisplayProps {
     birthTime?: number;
 }
 
-export const LiuYaoDisplay: React.FC<LiuYaoDisplayProps> = ({ 
-    method, 
-    question, 
+export const LiuYaoDisplay: React.FC<LiuYaoDisplayProps> = ({
+    method,
+    question,
     manualYaos,
     birthdayType,
     birthday,
@@ -49,7 +49,7 @@ export const LiuYaoDisplay: React.FC<LiuYaoDisplayProps> = ({
                         const year = dateParts[0];
                         const month = dateParts[1];
                         const day = dateParts[2];
-                        
+
                         // 使用指定的日期和时辰起卦
                         gua = liuyao.qiGuaBySpecificTime(year, month, day, birthTime || 0, birthdayType === 'lunar');
                     } else {
@@ -70,35 +70,35 @@ export const LiuYaoDisplay: React.FC<LiuYaoDisplayProps> = ({
             const fullGua = liuyao.naJia(gua);
             const fullGuaWithLiuQin = liuyao.anLiuQin(fullGua);
             const benGuaWithLiuShen = liuyao.anLiuShen(fullGuaWithLiuQin);
-            
+
             // 计算六卦
             // 1. 本卦
             const benGuaFull = benGuaWithLiuShen;
-            
+
             // 2. 变卦
             const bianGuaRaw = liuyao.calculateBianGua(benGuaFull);
             const bianGuaWithJia = liuyao.naJia(bianGuaRaw);
             const bianGuaWithLiuQin = liuyao.anLiuQin(bianGuaWithJia);
             const bianGuaFull = liuyao.anLiuShen(bianGuaWithLiuQin);
-            
+
             // 3. 伏卦
             const fuGuaRaw = liuyao.calculateFuGua(benGuaFull);
             const fuGuaWithJia = liuyao.naJia(fuGuaRaw);
             const fuGuaWithLiuQin = liuyao.anLiuQin(fuGuaWithJia);
             const fuGuaFull = liuyao.anLiuShen(fuGuaWithLiuQin);
-            
+
             // 4. 互卦
             const huGuaRaw = liuyao.calculateHuGua(benGuaFull);
             const huGuaWithJia = liuyao.naJia(huGuaRaw);
             const huGuaWithLiuQin = liuyao.anLiuQin(huGuaWithJia);
             const huGuaFull = liuyao.anLiuShen(huGuaWithLiuQin);
-            
+
             // 5. 错卦
             const cuoGuaRaw = liuyao.calculateCuoGua(benGuaFull);
             const cuoGuaWithJia = liuyao.naJia(cuoGuaRaw);
             const cuoGuaWithLiuQin = liuyao.anLiuQin(cuoGuaWithJia);
             const cuoGuaFull = liuyao.anLiuShen(cuoGuaWithLiuQin);
-            
+
             // 6. 综卦
             const zongGuaRaw = liuyao.calculateZongGua(benGuaFull);
             const zongGuaWithJia = liuyao.naJia(zongGuaRaw);
@@ -224,7 +224,7 @@ export const LiuYaoDisplay: React.FC<LiuYaoDisplayProps> = ({
     // 获取爻名
     const getYaoName = (position: number, yaoType: YaoType) => {
         const isYang = yaoType === YaoType.YangYao || yaoType === YaoType.OldYangYao;
-        
+
         switch (position) {
             case 6: return isYang ? '上九' : '上六';
             case 5: return isYang ? '九五' : '六五';
@@ -236,101 +236,125 @@ export const LiuYaoDisplay: React.FC<LiuYaoDisplayProps> = ({
         }
     };
 
+    // 添加一个函数来获取世爻的描述
+    const getShiYaoDescription = (gua: Gua | null) => {
+        if (!gua) return '';
+
+        // 根据卦的性质确定世爻描述
+        // 一般来说，乾、坎、艮、震为阳卦；坤、离、巽、兑为阴卦
+        const isYangGua = [0, 5, 6, 3].includes(gua.upperTrigram) || [0, 5, 6, 3].includes(gua.lowerTrigram);
+
+        // 根据卦的世爻位置确定描述
+        switch (gua.shiYao) {
+            case 1: return isYangGua ? '初世' : '游魂';
+            case 2: return isYangGua ? '二世' : '归魂';
+            case 3: return isYangGua ? '三世' : '纯卦';
+            case 4: return isYangGua ? '四世' : '游魂';
+            case 5: return isYangGua ? '五世' : '归魂';
+            case 6: return isYangGua ? '上世' : '纯卦';
+            default: return '';
+        }
+    };
+
     // 渲染单个卦表格
-    const renderGuaTable = (gua: Gua | null, title: string, shiYaoPosition?: string) => {
+    const renderGuaTable = (gua: Gua | null, title: string) => {
         if (!gua) return null;
-        
+
+        const shiYaoDescription = getShiYaoDescription(gua);
+
         return (
-            <div className="mb-4 border rounded-lg overflow-hidden">
-                <div className="flex justify-between items-center p-2 bg-gray-50 border-b">
-                    <div className="font-medium">{title}: {gua.guaName}</div>
-                    {shiYaoPosition && <div className="text-sm">{shiYaoPosition}</div>}
-                    <div className="text-sm">卦身: {getDiZhiText(gua.yaos[0].diZhi)}</div>
+            <div className="mb-4 rounded-lg overflow-hidden shadow-sm">
+                <div className="flex justify-center items-center p-2 bg-gray-50 gap-2 text-sm">
+                    <div className="font-semibold border px-2 py-1 rounded-md bg-gray-50 border-gray-300">{title}: {gua.guaName}</div>
+                    <div className="font-semibold border px-2 py-1 rounded-md bg-green-50 border-green-300">{shiYaoDescription}</div>
+                    <div className="font-semibold border px-2 py-1 rounded-md bg-blue-50 border-blue-300">卦身: {getDiZhiText(gua.yaos[0].diZhi)}</div>
                 </div>
-                <table className="w-full border-collapse text-sm">
-                    <thead>
-                        <tr className="bg-gray-50">
-                            <th className="py-1 px-2 text-left border-b">爻名</th>
-                            <th className="py-1 px-2 text-center border-b">卦象</th>
-                            <th className="py-1 px-2 text-center border-b">世应</th>
-                            <th className="py-1 px-2 text-center border-b">六亲</th>
-                            <th className="py-1 px-2 text-center border-b">干支</th>
-                            <th className="py-1 px-2 text-center border-b">五行</th>
-                            <th className="py-1 px-2 text-center border-b">六神</th>
-                            <th className="py-1 px-2 text-left border-b">爻辞</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {gua.yaos.slice().reverse().map((yao, index) => {
-                            const position = 6 - index;
-                            const yaoName = getYaoName(position, yao.type);
-                            
-                            // 获取对应的爻辞
-                            let yaoCiText = '';
-                            if (YAO_CI_DB[gua.guaIndex] && YAO_CI_DB[gua.guaIndex][5-index]) {
-                                yaoCiText = YAO_CI_DB[gua.guaIndex][5-index];
-                            }
-                            
-                            return (
-                                <tr key={`${title}-${position}`} className="border-b hover:bg-gray-50">
-                                    <td className="py-1 px-2">{yaoName}</td>
-                                    <td className="py-1 px-2 flex justify-center">
-                                        {renderYaoSymbol(yao.type)}
-                                    </td>
-                                    <td className="py-1 px-2 text-center">
-                                        {yao.isShiYao ? '世' : yao.isYingYao ? '应' : ''}
-                                    </td>
-                                    <td className="py-1 px-2 text-center">{getLiuQinText(yao.liuQin)}</td>
-                                    <td className="py-1 px-2 text-center">
-                                        {getTianGanText(yao.tianGan)}{getDiZhiText(yao.diZhi)}
-                                    </td>
-                                    <td className={`py-1 px-2 text-center ${getWuXingColor(yao.wuXing)}`}>
-                                        {getWuXingText(yao.wuXing)}
-                                    </td>
-                                    <td className="py-1 px-2 text-center">{getLiuShenText(yao.liuShen)}</td>
-                                    <td className="py-1 px-2 text-xs">
-                                        {yaoCiText}
-                                    </td>
-                                </tr>
-                            );
-                        })}
-                    </tbody>
-                </table>
+                <div>
+                    <table className="w-full text-sm">
+                        <thead>
+                            <tr className="bg-gray-50">
+                                <th className="py-1 px-2 text-left">爻名</th>
+                                <th className="py-1 px-2 text-center">卦象</th>
+                                <th className="py-1 px-2 text-center">世应</th>
+                                <th className="py-1 px-2 text-center">六亲</th>
+                                <th className="py-1 px-2 text-center">干支</th>
+                                <th className="py-1 px-2 text-center">五行</th>
+                                <th className="py-1 px-2 text-center">六神</th>
+                                <th className="py-1 px-2 text-left">爻辞</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {gua.yaos.slice().reverse().map((yao, index) => {
+                                const position = 6 - index;
+                                const yaoName = getYaoName(position, yao.type);
+
+                                // 获取对应的爻辞
+                                let yaoCiText = '';
+                                if (YAO_CI_DB[gua.guaIndex] && YAO_CI_DB[gua.guaIndex][5 - index]) {
+                                    yaoCiText = YAO_CI_DB[gua.guaIndex][5 - index];
+                                }
+
+                                return (
+                                    <tr key={`${title}-${position}`} className="hover:bg-gray-50">
+                                        <td className="py-1 px-2">{yaoName}</td>
+                                        <td className="py-1 px-2 flex justify-center">
+                                            {renderYaoSymbol(yao.type)}
+                                        </td>
+                                        <td className="py-1 px-2 text-center">
+                                            {yao.isShiYao ? '世' : yao.isYingYao ? '应' : ''}
+                                        </td>
+                                        <td className="py-1 px-2 text-center">{getLiuQinText(yao.liuQin)}</td>
+                                        <td className="py-1 px-2 text-center">
+                                            {getTianGanText(yao.tianGan)}{getDiZhiText(yao.diZhi)}
+                                        </td>
+                                        <td className={`py-1 px-2 text-center ${getWuXingColor(yao.wuXing)}`}>
+                                            {getWuXingText(yao.wuXing)}
+                                        </td>
+                                        <td className="py-1 px-2 text-center">{getLiuShenText(yao.liuShen)}</td>
+                                        <td className="py-1 px-2 text-xs relative">
+                                            {yaoCiText}
+                                        </td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         );
     };
 
     return (
         <div className="p-2 md:p-6 bg-white rounded-lg shadow-md">
-            
+
             <div className="grid grid-cols-1 gap-4">
                 {/* 本卦和变卦 */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        {renderGuaTable(benGua, '本卦', `二世`)}
+                        {renderGuaTable(benGua, '本卦')}
                     </div>
                     <div>
-                        {renderGuaTable(bianGua, '变卦', `八纯`)}
+                        {renderGuaTable(bianGua, '变卦')}
                     </div>
                 </div>
-                
+
                 {/* 互卦和错卦 */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        {renderGuaTable(huGua, '互卦', `三世`)}
+                        {renderGuaTable(huGua, '互卦')}
                     </div>
                     <div>
-                        {renderGuaTable(cuoGua, '错卦', `四世`)}
+                        {renderGuaTable(cuoGua, '错卦')}
                     </div>
                 </div>
-                
+
                 {/* 综卦和伏卦 */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        {renderGuaTable(zongGua, '综卦', `地风升`)}
+                        {renderGuaTable(zongGua, '综卦')}
                     </div>
                     <div>
-                        {renderGuaTable(fuGua, '伏卦', `四世`)}
+                        {renderGuaTable(fuGua, '伏卦')}
                     </div>
                 </div>
             </div>
